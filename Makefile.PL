@@ -1,6 +1,7 @@
 use inc::Module::Install;
 name 'Neat';
 all_from 'lib/Neat.pm';
+readme_from "lib/Neat.pm";
 
 # requires '';
 
