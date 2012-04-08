@@ -1,11 +1,20 @@
 NAME
-    Neat -
+    Neat - recoed network setting.
 
 SYNOPSIS
       use Neat;
+      $neat = Neat->new;
+
+      my $ip = $neat->ip_from_mac( "xx:xx:xx:xx:xx:xx" );
+      my $ip = $neat->be_ip( "xxx.xxx.xxx.xxx" );
+      my $ip = $neat->ip_from_name( "example.com" );
+
+      say $ip->mac;
+      say $ip->ip;
+      say join " - ", $ip->names;
 
 DESCRIPTION
-    Neat is
+    Neat can record network configuration.
 
 AUTHOR
     kuniyoshi <kuniyoshi@cpan.org>
