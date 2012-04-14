@@ -1,40 +1,44 @@
 package Neat::Data;
 use strict;
 use warnings;
-use Time::Piece ( );
-use JSON;
+use base "Class::DBI";
+use Data::Dumper;
+use Time::Piece ();
 
-our $AUTOLOAD;
+__PACKAGE__->connection(
+    "dbi:CSV:",
+    undef,
+    undef,
+    {
+        f_dir        => "data.d",
+        f_encoding   => "utf8",
+        csv_eol      => "\n",
+        csv_sep_char => "\t",
+    },
+);
 
-my $CODEC = JSON->new->utf8;
+__PACKAGE__->add_trigger(
+    before_create => sub {
+        my $self  = shift;
+        my $class = ref $self;
 
-sub new { bless { }, shift }
+        $self->created_at( $class->now->datetime );
+        $self->updated_at( $class->now->datetime );
+    },
+);
 
-sub AUTOLOAD {
-    my $self = shift;
-    ( my $method = $AUTOLOAD ) =~ s{ .* :: }{}msx;
+__PACKAGE__->add_trigger(
+    before_update => sub {
+        my $self  = shift;
+        my $class = ref $self;
 
-    return $self->{ $method } if exists $self->{ $method };
+        $self->updated_at( $class->now->datetime );
+    },
+);
 
-    die "No method[$method] defined.";
-}
+sub now { Time::Piece::localtime }
 
-sub DESTROY { }
-
-sub oid { shift->{_id} }
-
-sub createstamp {
-    my $self = shift;
-    my $oid  = $self->{_id};
-    return Time::Piece::localtime( $oid->get_time );
-}
-
-sub as_hashref {
-    my $self  = shift;
-    my %clone = %{ $self };
-    delete $clone{_id};
-    return \%clone;
-}
+sub dump { Data::Dumper->new( [ splice @_, 1 ] )->Terse( 1 )->Indent( 0 )->Sortkeys( 1 )->Dump }
 
 1;
 
