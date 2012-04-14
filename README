@@ -5,16 +5,122 @@ SYNOPSIS
       use Neat;
       $neat = Neat->new;
 
-      my $ip = $neat->ip_from_mac( "xx:xx:xx:xx:xx:xx" );
-      my $ip = $neat->be_ip( "xxx.xxx.xxx.xxx" );
-      my $ip = $neat->ip_from_name( "example.com" );
-
-      say $ip->mac;
-      say $ip->ip;
-      say join " - ", $ip->names;
-
 DESCRIPTION
     Neat can record network configuration.
+
+DB SCHEMA
+  TABLES
+   CSV
+    mac
+          CREATE TABLE mac (
+              id         INTEGER,
+              address    CHAR(17),
+              created_at CHAR(19),
+              updated_at CHAR(19)
+          )
+
+    ip
+          CREATE TABLE ip (
+              id          INTEGER,
+              mac_id      INTEGER,
+              network_id  INTEGER,
+              address     VARCHAR(39),
+              version     INTEGER,
+              created_at CHAR(19),
+              updated_at CHAR(19)
+          )
+
+    network
+          CREATE TABLE network (
+              id          INTEGER,
+              address     CHAR(128),
+              cidr        INTEGER,
+              note        CHAR,
+              created_at  CHAR(19),
+              updated_at  CHAR(19)
+          )
+
+    domain
+          CREATE TABLE domain (
+              id         INTEGER,
+              name       CHAR,
+              type       INTEGER,
+              class      INTEGER,
+              data       CHAR,
+              ttl        INTEGER,
+              created_at CHAR(19),
+              updated_at CHAR(19)
+          )
+
+   MySQL
+    Very sorry, those are for the future for me. Please use CSV.
+
+    mac
+          CREATE TABLE mac (
+              id          INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+              address     CHAR(128)    NOT NULL,
+              createstamp DATETIME     NOT NULL,
+              timestamp   TIMESTAMP    NOT NULL,
+              UNIQUE (`address`)
+          );
+
+    ip
+          CREATE TABLE ip (
+              id          INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+              mac_id      INT UNSIGNED NOT NULL,
+              network_id  INT UNSIGNED NOT NULL,
+              address     CHAR(128)    NOT NULL,
+              version     TINYINT(1)   NOT NULL DEFAULT 4,
+              createstamp DATETIME     NOT NULL,
+              timestamp   TIMESTAMP    NOT NULL,
+              KEY `version_address` (`version`, `address`),
+              UNIQUE (`mac_id`),
+              KEY (`network_id`)
+          )
+
+    network
+          CREATE TABLE network (
+              id          INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+              address     CHAR(128)    NOT NULL,
+              cidr        INT UNSIGNED NOT NULL,
+              note        TEXT         NOT NULL,
+              createstamp DATETIME     NOT NULL,
+              timestamp   TIMESTAMP    NOT NULL,
+              KEY `address_cidr` (`address`, `cidr`)
+          )
+
+    domain
+          CREATE TABLE domain (
+              id          INT UNSIGNED     NOT NULL PRIMARY KEY AUTO_INCREMENT,
+              name        VARCHAR(255)     NOT NULL DEFAULT 'neat',
+              type        TINYINT UNSIGNED NOT NULL DEFAULT 1,
+              class       TINYINT UNSIGNED NOT NULL DEFAULT 1,
+              data        VARCHAR(255)     NOT NULL,
+              ttl         INT              NOT NULL,
+              createstamp DATETIME         NOT NULL,
+              timestamp   TIMESTAMP        NOT NULL,
+              KEY `name` (`name`),
+              KEY `type_class_data` (`type`, `class`, `data`)
+          )
+
+    task
+          CREATE TABLE task (
+              id          INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+              name        VARCHAR(255) NOT NULL,
+              createstamp DATETIME     NOT NULL,
+              timestamp   TIMESTAMP    NOT NULL
+          )
+
+    job
+          CREATE TABLE job (
+              id          INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+              task_id     INT UNSIGNED NOT NULL,
+              name        VARCHAR(255) NOT NULL,
+              params      TEXT         NOT NULL,
+              createstamp DATETIME     NOT NULL,
+              timestamp   TIMESTAMP    NOT NULL,
+              KEY `task_id` (`task_id`)
+          )
 
 AUTHOR
     kuniyoshi <kuniyoshi@cpan.org>
